@@ -801,6 +801,18 @@
       <img src="finish.jpg" alt="Финиш!" />
     </div>
 
+    <!-- Hidden audio iframe for final music -->
+    <iframe 
+      id="birthdayMusic"
+      width="0" 
+      height="0" 
+      scrolling="no" 
+      frameborder="no" 
+      allow="autoplay" 
+      src="https://w.soundcloud.com/player/?url=https%3A//api.soundcloud.com/tracks/699795097&color=%23ff5500&auto_play=false&hide_related=true&show_comments=false&show_user=false&show_reposts=false&show_teaser=false&visual=false"
+      style="display: none; position: fixed; top: -9999px; left: -9999px;"
+    ></iframe>
+
     <script>
       // ===== Simple parallax by translating layers on scroll =====
       (function () {
@@ -985,6 +997,13 @@
           document.getElementById('victoryModal').classList.remove('open');
           const finalScreen = document.getElementById('finalScreen');
           finalScreen.classList.add('show');
+          
+          // Запускаем музыку Happy Birthday!
+          const musicIframe = document.getElementById('birthdayMusic');
+          if (musicIframe) {
+            // Меняем src чтобы запустить auto_play
+            musicIframe.src = 'https://w.soundcloud.com/player/?url=https%3A//api.soundcloud.com/tracks/699795097&color=%23ff5500&auto_play=true&hide_related=true&show_comments=false&show_user=false&show_reposts=false&show_teaser=false&visual=false';
+          }
           
           // Продолжаем фейерверки в фоне
           setTimeout(() => launchMultipleFireworks(10), 500);
