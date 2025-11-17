@@ -628,6 +628,53 @@
       #giftGame canvas {
         border-radius: 14px;
       }
+
+      /* Final screen with fireworks */
+      .final-screen {
+        position: fixed;
+        inset: 0;
+        z-index: 99999;
+        background: #000;
+        display: none;
+        align-items: center;
+        justify-content: center;
+        opacity: 0;
+        transition: opacity 0.5s ease;
+      }
+      .final-screen.show {
+        display: flex;
+        opacity: 1;
+      }
+      .final-screen img {
+        max-width: 100%;
+        max-height: 100%;
+        object-fit: contain;
+        animation: finalZoom 1.5s ease-out;
+      }
+      
+      @keyframes finalZoom {
+        0% {
+          transform: scale(0.3);
+          opacity: 0;
+        }
+        50% {
+          transform: scale(1.05);
+        }
+        100% {
+          transform: scale(1);
+          opacity: 1;
+        }
+      }
+
+      /* Firework particles */
+      .firework {
+        position: fixed;
+        width: 8px;
+        height: 8px;
+        border-radius: 50%;
+        pointer-events: none;
+        z-index: 100000;
+      }
     </style>
   </head>
   <body>
@@ -666,42 +713,6 @@
         </div>
       </div>
     </div>
-
-    <section id="gift">
-      <div class="gift">
-        <h2 style="margin: 0 0 6px">Маршрут к подарку 🎯</h2>
-        <p class="subtitle" style="margin: 0">
-          Следуй шагам ниже — и легендарный подарок окажется у тебя в руках.
-        </p>
-        <div class="steps">
-          <div class="step">
-            <span class="chip">Шаг 1</span>
-            <h4>Найди человека с самым громким смехом</h4>
-            <p>Скажи кодовое слово: <b>«Плюшевый Питон»</b>.</p>
-          </div>
-          <div class="step">
-            <span class="chip">Шаг 2</span>
-            <h4>Сделай победный жест ✌️</h4>
-            <p>Тебе вручат стрелку-наводку, куда идти дальше.</p>
-          </div>
-          <div class="step">
-            <span class="chip">Шаг 3</span>
-            <h4>Открой карту в телефоне</h4>
-            <p>
-              Перейди по стрелкам до места <b>Х</b>. Там тебя ждёт следующий
-              сюрприз.
-            </p>
-          </div>
-          <div class="step">
-            <span class="chip">Финиш</span>
-            <h4>Скажи «Я это заслужил!»</h4>
-            <p>
-              И забери свой подарок. Если что — позови друзей из DimaTeam 😉
-            </p>
-          </div>
-        </div>
-      </div>
-    </section>
 
     <div class="footer">
       Сделано с любовью и юмором. Пусть у Димы будет лучший год! 💙
@@ -754,9 +765,7 @@
                 role="img"
               ></canvas>
               <footer>
-                Управление: ← → — движение, пробел — прыжок. На 2‑м уровне:
-                собирай блинчики для штанги, доберись до штанги сверху, затем
-                нажимай ↓, чтобы 3 раза присесть, уворачиваясь от выпечки.
+                Управление: ← → — движение, пробел — прыжок.
               </footer>
             </div>
           </div>
@@ -787,6 +796,11 @@
       </div>
     </div>
 
+    <!-- Final screen with image -->
+    <div class="final-screen" id="finalScreen">
+      <img src="finish.jpg" alt="Финиш!" />
+    </div>
+
     <script>
       // ===== Simple parallax by translating layers on scroll =====
       (function () {
@@ -814,7 +828,7 @@
       const toast = document.getElementById("toast");
 
       function showToast(text) {
-        toast.textContent = "✨ Ты " + text + "! ✨";
+        toast.textContent = "✨ Я " + text + "! ✨";
         toast.classList.add("show");
         setTimeout(() => toast.classList.remove("show"), 2500);
       }
@@ -893,9 +907,88 @@
         document.getElementById("giftLink").addEventListener("click", fireOnce);
       })();
 
+      // ===== Fireworks effect =====
+      function createFirework(x, y) {
+        const colors = ['#ff0040', '#ff9500', '#ffdd00', '#00ff88', '#00ddff', '#dd00ff', '#ff0080'];
+        const particles = 30 + Math.random() * 20;
+        
+        for (let i = 0; i < particles; i++) {
+          const particle = document.createElement('div');
+          particle.className = 'firework';
+          particle.style.left = x + 'px';
+          particle.style.top = y + 'px';
+          particle.style.background = colors[Math.floor(Math.random() * colors.length)];
+          document.body.appendChild(particle);
+          
+          const angle = (Math.PI * 2 * i) / particles;
+          const velocity = 2 + Math.random() * 4;
+          const vx = Math.cos(angle) * velocity;
+          const vy = Math.sin(angle) * velocity;
+          
+          let posX = x;
+          let posY = y;
+          let velocityX = vx;
+          let velocityY = vy;
+          let opacity = 1;
+          
+          const animate = () => {
+            velocityY += 0.1; // gravity
+            posX += velocityX;
+            posY += velocityY;
+            opacity -= 0.015;
+            
+            particle.style.left = posX + 'px';
+            particle.style.top = posY + 'px';
+            particle.style.opacity = opacity;
+            
+            if (opacity > 0) {
+              requestAnimationFrame(animate);
+            } else {
+              particle.remove();
+            }
+          };
+          
+          requestAnimationFrame(animate);
+        }
+      }
+
+      function launchMultipleFireworks(count = 15) {
+        for (let i = 0; i < count; i++) {
+          setTimeout(() => {
+            const x = 100 + Math.random() * (window.innerWidth - 200);
+            const y = 100 + Math.random() * (window.innerHeight / 2);
+            createFirework(x, y);
+            
+            // Sound effect
+            if (window.fireConfetti) {
+              const freq = 400 + Math.random() * 400;
+              // Используем существующую систему звуков если есть
+            }
+          }, i * 150);
+        }
+      }
+
       // ===== Victory modal close button =====
       document.getElementById("closeVictory").addEventListener("click", () => {
-        document.getElementById("victoryModal").classList.remove("open");
+        // Запускаем фейерверки
+        launchMultipleFireworks(20);
+        
+        // Запускаем конфетти несколько раз
+        if (window.fireConfetti) {
+          window.fireConfetti();
+          setTimeout(() => window.fireConfetti(), 300);
+          setTimeout(() => window.fireConfetti(), 600);
+        }
+        
+        // Через 1 секунду показываем финальную картинку
+        setTimeout(() => {
+          document.getElementById('victoryModal').classList.remove('open');
+          const finalScreen = document.getElementById('finalScreen');
+          finalScreen.classList.add('show');
+          
+          // Продолжаем фейерверки в фоне
+          setTimeout(() => launchMultipleFireworks(10), 500);
+        }, 1000);
       });
       // ===== Modal open/close & start game =====
       (function () {
@@ -1407,7 +1500,7 @@
           ctx.fillRect(b.x + b.w / 2 - 2, b.y, 4, b.h);
           ctx.restore();
           if (b.open) {
-            const msg = "LEVEL " + (state.level + 2) + " — НАЧАТЬ";
+            const msg = "Подарок открыт!";
             ctx.save();
             ctx.font = "26px sans-serif";
             ctx.fillStyle = "#111";
